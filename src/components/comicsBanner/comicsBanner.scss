@@ -1,0 +1,22 @@
+@import '../../style/variables.scss';
+
+.comics {
+    &__banner {
+        width: 100%;
+        background-color: $dark;
+        padding: 0 45px 0 45px;
+        display: grid;
+        grid-template-columns: 152px auto 133px;
+        height: 100%;
+        margin-top: 50px;
+
+        &-text {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            line-height: normal;
+            padding-top: 18px;
+            padding-left: 83px;
+        }
+    }
+}
