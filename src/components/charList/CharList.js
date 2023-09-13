@@ -1,4 +1,6 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
+
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Spinner from '../spinner/Spinner';
 import MarvelServices from '../../services/MarvelServices';
@@ -48,6 +50,12 @@ class CharList extends Component {
         })
     }
 
+    onSelectedCharLocal = (id) => {
+        this.setState({
+            characterSelected: id
+        }) 
+    }
+
     onCharListLoaded = (newCharList) => { // first loading of 9 cards
 
         let ended = false;
@@ -80,12 +88,19 @@ class CharList extends Component {
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
                 imgStyle = {'objectFit' : 'unset'};
             }
-            
+
+            const active = this.state.characterSelected === item.id,  
+            clazz = active ? 'char__item char__item_selected' : 'char__item';
+
             return (
                 <li 
-                    className="char__item"
+                    className={clazz}
                     key={item.id}
-                    onClick={() => this.props.onSelectedChar(item.id)}>
+                    onClick={() => {    
+                        this.onSelectedCharLocal(item.id)
+                        this.props.onSelectedChar(item.id);
+                    }}>
+                 
                         <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
                         <div className="char__name">{item.name}</div>
                 </li>
@@ -121,6 +136,10 @@ class CharList extends Component {
         </div>
     )
 }
+}
+
+CharList.propTypes = {
+    onSelectedChar: PropTypes.func.isRequired
 }
 
 export default CharList;
