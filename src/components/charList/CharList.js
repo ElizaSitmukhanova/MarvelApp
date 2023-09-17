@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -7,89 +7,114 @@ import MarvelServices from '../../services/MarvelServices';
 
 import './charlist.scss'
 
-class CharList extends Component {
-    state = {
-        charList: [], 
-        loading: true,
-        error: false,
-        newItemLoading: false,
-        offset: 210,
-        charEnded: false
-    }
+const CharList = (props) => {
+    
+    const [charList, setCharList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [newItemLoading, setNewItemLoading] = useState(false);
+    const [offset, setOffset] = useState(210);
+    const [charEnded, setCharEnded] = useState(false);
+    const [selectedChar, setChar] = useState(null)
 
-    marvelServices = new MarvelServices;
+  
 
-    componentDidMount = () => {
-       this.onRequest(); //first render with baseOffset=210
-       window.addEventListener('scroll', this.showCharListByScroll);
+    const marvelServices = new MarvelServices;
+    useEffect(() => {
+        onRequest();
+        
+    }, [])
+    useEffect(() => {
+       
+        window.addEventListener('scroll', showCharListByScroll);
+        console.log('mount')
+    }, [])
+
+    useEffect(() => {
+        return () => {
+            window.addEventListener('scroll', showCharListByScroll);
        console.log('mount')
-    }
-    componentWillUnmount = () => {
-        window.removeEventListener('scroll', this.showCharListByScroll);
-        console.log('unmount')
-    }
-
-    showCharListByScroll = () => {
-        if(window.pageXOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight){
-            if(this.state.charEnded){
-                window.removeEventListener('scroll', this.showCharListByScroll);
-            } else {
-                this.onRequest(this.state.offset)
-            }
         }
+      }, []);
+
+      const showCharListByScroll = () => {
+        if((document.documentElement.clientHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 && !newItemLoading){
+            if(charEnded){
+                window.removeEventListener('scroll', showCharListByScroll);
+            } else {
+               onRequest(offset)
+            }
+        
     }
-    onRequest = (offset) => {
-        this.onCharListLoading();
-        this.marvelServices.getAllCharacters(offset)
-        .then(this.onCharListLoaded).catch(this.onError)
+}
+
+    /* componentDidMount = () => {
+       this.onRequest(); //first render with baseOffset=210
+       window.addEventListener('scroll', showCharListByScroll);
+       console.log('mount')
+    } 
+   componentWillUnmount = () => {
+        window.removeEventListener('scroll', showCharListByScroll);
+        console.log('unmount')
+    } 
+
+   showCharListByScroll = () => {
+        if(window.pageXOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight){
+            if(charEnded){
+                window.removeEventListener('scroll', showCharListByScroll);
+            } else {
+               onRequest(offset)
+            }
+        
+    }  */
+    function onRequest (offset) {
+        if (!offset) {
+            setCharList([]);
+            setOffset(210)
+        }
+        onCharListLoading();
+        marvelServices.getAllCharacters(offset)
+        .then(onCharListLoaded).catch(onError)
     }
 
-    onCharListLoading = () => {
-        this.setState({
-            newItemLoading: true
-        })
+    const onCharListLoading = () => {
+        setNewItemLoading(true)
     }
 
-    onSelectedCharLocal = (id) => {
-        this.setState({
-            characterSelected: id
-        }) 
+    const onSelectedCharLocal = (id) => {
+       setChar(id)
     }
 
-    onCharListLoaded = (newCharList) => { // first loading of 9 cards
+    const onCharListLoaded = (newCharList) => { // first loading of 9 cards
 
         let ended = false;
         if (newCharList.length < 9) {
             ended = true;
-        }
+        }  
         
-        this.setState(({offset, charList}) => ({
-            charList: [...charList, ...newCharList],
-            loading: false,
-            newItemLoading: false,
-            offset: offset + 9,
-            charEnded: ended
-        }))    
+        setCharList(charList => [...charList, ...newCharList]);
+        setLoading(loading => false);
+        setNewItemLoading(newItemLoading => false);
+        setOffset(offset => offset + 9);
+        setCharEnded(charEnded => ended)
     }
 
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
+    const onError = () => {
+        setLoading(loading => false);
+        setError(true)
     }
 
     
   // Этот метод создан для оптимизации, 
     // чтобы не помещать такую конструкцию в метод render
-    renderItems(arr) {
+    function renderItems (arr) {
         const items =  arr.map((item) => {
             let imgStyle = {'objectFit' : 'cover'};
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
                 imgStyle = {'objectFit' : 'unset'};
             }
 
-            const active = this.state.characterSelected === item.id,  
+            const active = selectedChar === item.id,  
             clazz = active ? 'char__item char__item_selected' : 'char__item';
 
             return (
@@ -97,8 +122,8 @@ class CharList extends Component {
                     className={clazz}
                     key={item.id}
                     onClick={() => {    
-                        this.onSelectedCharLocal(item.id)
-                        this.props.onSelectedChar(item.id);
+                        onSelectedCharLocal(item.id)
+                        props.onSelectedChar(item.id);
                     }}>
                  
                         <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
@@ -113,10 +138,8 @@ class CharList extends Component {
             </ul>
         )
     }
-   render() {
-    const {charList, loading, error, offset, newItemLoading, charEnded} = this.state;
         
-    const items = this.renderItems(charList);
+    const items = renderItems(charList);
 
     const errorMessage = error ? <ErrorMessage/> : null;
     const spinner = loading ? <Spinner/> : null;
@@ -129,13 +152,12 @@ class CharList extends Component {
             {content}
             <button className="button button__main button__long"
             disabled={newItemLoading}
-            onClick={() => this.onRequest(offset)}
+            onClick={() => onRequest(offset)}
             style={{'display' : charEnded ? 'none' : 'block'}}>
                 <div className="inner">load more</div>
             </button>
         </div>
     )
-}
 }
 
 CharList.propTypes = {

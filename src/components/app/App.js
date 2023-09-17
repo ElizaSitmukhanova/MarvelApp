@@ -5,20 +5,18 @@ import CharList from '../charList/CharList';
 import CharInfo from "../charInfo/CharInfo";
 import "../../style/style.scss";
 import bgdecoration from "../../images/bg_decoration.png";
-import { Component } from "react";
+import { useState } from "react";
 import ErrorBoundarie from "../errorBoundarie/ErrorBoundarie";
 
 
-class App extends Component {
-    state = {
-        selectedChar: null
+const App = () => {
+   
+    const [selectedChar, setChar] = useState(null)
+
+    const onSelectedChar = (id) => {
+        setChar(id)
     }
-    onSelectedChar = (id) => {
-        this.setState({
-            selectedChar: id
-        })
-    }
-    render() {
+    
         return (
             <div className="app">
                 <AppHeader />
@@ -30,10 +28,10 @@ class App extends Component {
                     </ErrorBoundarie>
                     <div className="char__content">
                         <ErrorBoundarie>
-                            <CharList onSelectedChar={this.onSelectedChar} />
+                            <CharList onSelectedChar={onSelectedChar} />
                         </ErrorBoundarie>
 
-                        <CharInfo charId={this.state.selectedChar} />
+                        <CharInfo charId={selectedChar} />
 
 
                     </div>
@@ -45,6 +43,6 @@ class App extends Component {
         )
     }
 
-}
+
 
 export default App;
