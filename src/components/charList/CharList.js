@@ -1,4 +1,4 @@
-import { Component, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -8,45 +8,36 @@ import MarvelServices from '../../services/MarvelServices';
 import './charlist.scss'
 
 const CharList = (props) => {
-    
+
     const [charList, setCharList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
-    const [selectedChar, setChar] = useState(null)
-
-  
+    const [selectedChar, setChar] = useState(null);
 
     const marvelServices = new MarvelServices;
-    useEffect(() => {
-        onRequest();
-        
-    }, [])
-    useEffect(() => {
-       
-        window.addEventListener('scroll', showCharListByScroll);
-        console.log('mount')
-    }, [])
 
     useEffect(() => {
+        if (newItemLoading && !charEnded) {
+            onRequest();
+        }
+    }, [newItemLoading])
+
+    useEffect(() => {
+        window.addEventListener('scroll', showCharListByScroll);
         return () => {
             window.addEventListener('scroll', showCharListByScroll);
-       console.log('mount')
         }
-      }, []);
+    }, [])
+     
 
-      const showCharListByScroll = () => {
-        if((document.documentElement.clientHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 && !newItemLoading){
-            if(charEnded){
-                window.removeEventListener('scroll', showCharListByScroll);
-            } else {
-               onRequest(offset)
-            }
-        
+    const showCharListByScroll = () => {
+        if ((document.documentElement.clientHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 && !newItemLoading) {
+                setNewItemLoading(true);
+        }
     }
-}
 
     /* componentDidMount = () => {
        this.onRequest(); //first render with baseOffset=210
@@ -67,14 +58,11 @@ const CharList = (props) => {
             }
         
     }  */
-    function onRequest (offset) {
-        if (!offset) {
-            setCharList([]);
-            setOffset(210)
-        }
+    function onRequest(offset) {
+     
         onCharListLoading();
         marvelServices.getAllCharacters(offset)
-        .then(onCharListLoaded).catch(onError)
+            .then(onCharListLoaded).catch(onError)
     }
 
     const onCharListLoading = () => {
@@ -82,7 +70,7 @@ const CharList = (props) => {
     }
 
     const onSelectedCharLocal = (id) => {
-       setChar(id)
+        setChar(id)
     }
 
     const onCharListLoaded = (newCharList) => { // first loading of 9 cards
@@ -90,8 +78,8 @@ const CharList = (props) => {
         let ended = false;
         if (newCharList.length < 9) {
             ended = true;
-        }  
-        
+        }
+
         setCharList(charList => [...charList, ...newCharList]);
         setLoading(loading => false);
         setNewItemLoading(newItemLoading => false);
@@ -104,30 +92,30 @@ const CharList = (props) => {
         setError(true)
     }
 
-    
-  // Этот метод создан для оптимизации, 
+
+    // Этот метод создан для оптимизации, 
     // чтобы не помещать такую конструкцию в метод render
-    function renderItems (arr) {
-        const items =  arr.map((item) => {
-            let imgStyle = {'objectFit' : 'cover'};
+    function renderItems(arr) {
+        const items = arr.map((item) => {
+            let imgStyle = { 'objectFit': 'cover' };
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
-                imgStyle = {'objectFit' : 'unset'};
+                imgStyle = { 'objectFit': 'unset' };
             }
 
-            const active = selectedChar === item.id,  
-            clazz = active ? 'char__item char__item_selected' : 'char__item';
+            const active = selectedChar === item.id,
+                clazz = active ? 'char__item char__item_selected' : 'char__item';
 
             return (
-                <li 
+                <li
                     className={clazz}
                     key={item.id}
-                    onClick={() => {    
+                    onClick={() => {
                         onSelectedCharLocal(item.id)
                         props.onSelectedChar(item.id);
                     }}>
-                 
-                        <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
-                        <div className="char__name">{item.name}</div>
+
+                    <img src={item.thumbnail} alt={item.name} style={imgStyle} />
+                    <div className="char__name">{item.name}</div>
                 </li>
             )
         });
@@ -138,11 +126,11 @@ const CharList = (props) => {
             </ul>
         )
     }
-        
+
     const items = renderItems(charList);
 
-    const errorMessage = error ? <ErrorMessage/> : null;
-    const spinner = loading ? <Spinner/> : null;
+    const errorMessage = error ? <ErrorMessage /> : null;
+    const spinner = loading ? <Spinner /> : null;
     const content = !(loading || error) ? items : null;
 
     return (
@@ -151,9 +139,9 @@ const CharList = (props) => {
             {spinner}
             {content}
             <button className="button button__main button__long"
-            disabled={newItemLoading}
-            onClick={() => onRequest(offset)}
-            style={{'display' : charEnded ? 'none' : 'block'}}>
+                disabled={newItemLoading}
+                onClick={() => onRequest(offset)}
+                style={{ 'display': charEnded ? 'none' : 'block' }}>
                 <div className="inner">load more</div>
             </button>
         </div>
