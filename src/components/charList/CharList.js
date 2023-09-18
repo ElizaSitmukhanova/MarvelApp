@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -20,22 +20,26 @@ const CharList = (props) => {
     const marvelServices = new MarvelServices;
 
     useEffect(() => {
-        if (newItemLoading && !charEnded) {
-            onRequest();
-        }
-    }, [newItemLoading])
-
-    useEffect(() => {
+    
         window.addEventListener('scroll', showCharListByScroll);
         return () => {
+            
             window.addEventListener('scroll', showCharListByScroll);
         }
     }, [])
-     
 
+    useEffect(() => {
+        if (newItemLoading && !charEnded) {
+            
+            onRequest();
+            
+        }
+    }, [newItemLoading])
+    
     const showCharListByScroll = () => {
         if ((document.documentElement.clientHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 && !newItemLoading) {
                 setNewItemLoading(true);
+                
         }
     }
 
@@ -58,11 +62,16 @@ const CharList = (props) => {
             }
         
     }  */
-    function onRequest(offset) {
-     
+
+    const onRequest = () => {
+        
         onCharListLoading();
         marvelServices.getAllCharacters(offset)
-            .then(onCharListLoaded).catch(onError)
+            .then(onCharListLoaded)
+            .catch(onError)
+            .finally(
+                () => setNewItemLoading(false));
+          
     }
 
     const onCharListLoading = () => {
@@ -134,7 +143,7 @@ const CharList = (props) => {
     const content = !(loading || error) ? items : null;
 
     return (
-        <div className="char__list">
+        <div className="char__list" >
             {errorMessage}
             {spinner}
             {content}
