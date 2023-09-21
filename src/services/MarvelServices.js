@@ -8,11 +8,18 @@ const useMarvelServices = () => {
     const _apiKey = 'apikey=dfd98d302cdf53cf24e2eaf0e60725fd';
 
     const _baseOffset = 210;
+    const _comicOffset = 400;
    /*  const _total = 0; */
+  
 
     const getAllCharacters = async (offset = _baseOffset) => {
         const res = await request(`${_apiBase}characters?limit=9&offset=${offset}&${_apiKey}`);
         return res.data.results.map(_transfomCharacter);
+    }
+
+    const getAllComics = async (offset = _comicOffset) => {
+        const res = await request(`${_apiBase}comics?limit=8&offset=${offset}&${_apiKey}`);
+        return res.data.results.map(_transfomComics);
     }
     
     const getCharacter = async (id) => {
@@ -29,10 +36,22 @@ const useMarvelServices = () => {
         homepage: char.urls[0].url,
         wiki: char.urls[1].url,
         comics: char.comics.items,
-        }   
+        }  
     }
+    
+    const _transfomComics = (comics) => {
+            return { 
+            id: comics.id,
+            name: comics.name ? `${comics.name}` : `No name`,
+            description: comics.description ? comics.description.length > 220 ? comics.description.slice(0, 219) + '...' : comics.description : 'No description about this comics',
+            thumbnail: comics.thumbnail.path + '.' + comics.thumbnail.extension,
+            pageCount: comics.pageCount ? `${comics.pageCount} p.` : `No information about the number of pages`,
+            price: comics.prices[0].price ? `${comics.prices[0].price} $` : `NOT AVAILABLE`,
+            }   
+    
+        }
 
-    return {loading, error, getAllCharacters, getCharacter, clearError}
+    return {loading, error, getAllCharacters, getAllComics, getCharacter, clearError}
 }
 
 export default useMarvelServices;

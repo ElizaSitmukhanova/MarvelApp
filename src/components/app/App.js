@@ -2,6 +2,7 @@ import AppHeader from "../appHeader/AppHeader";
 import ComicsBanner from "../comicsBanner/ComicsBanner";
 import RandomChar from "../randomChar/RandomChar";
 import CharList from '../charList/CharList';
+import ComicsList from "../comicsList/ComicsList";
 import CharInfo from "../charInfo/CharInfo";
 import "../../style/style.scss";
 import bgdecoration from "../../images/bg_decoration.png";
@@ -50,11 +51,11 @@ const App = () => {
                 <AppHeader/>
                 <ComicsBanner />
                 <main>
-                    <ErrorBoundarie>
+                   {/*  <ErrorBoundarie>
                         <RandomChar />
-                    </ErrorBoundarie>
+                    </ErrorBoundarie> */}
                    
-                 <div className="char__content">
+            {/*      <div className="char__content">
                         <ErrorBoundarie>
                             <CharList onSelectedChar={onSelectedChar} />
                         </ErrorBoundarie>
@@ -62,8 +63,8 @@ const App = () => {
                               <CharInfo charId={selectedChar}  />
 
 
-                    </div> 
-                    {/*  <ComicsList /> */}
+                    </div>  */}
+                    <ComicsList /> 
                     {/* <SingleComics/> */}
                     <img className="bg-decoration" src={bgdecoration} alt="vision" />
                 </main>
