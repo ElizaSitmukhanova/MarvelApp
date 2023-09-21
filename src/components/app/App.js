@@ -33,7 +33,12 @@ const App = () => {
     }
      
     const pageUp = () => {
-        console.log('вверх')
+        console.log('вверх');
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth',
+          });
     }
 
     let pageUpClass = 'pageup';
@@ -48,15 +53,16 @@ const App = () => {
                     <ErrorBoundarie>
                         <RandomChar />
                     </ErrorBoundarie>
-                    <div className="char__content">
+                   
+                 <div className="char__content">
                         <ErrorBoundarie>
                             <CharList onSelectedChar={onSelectedChar} />
                         </ErrorBoundarie>
 
-                        <CharInfo charId={selectedChar}  />
+                              <CharInfo charId={selectedChar}  />
 
 
-                    </div>
+                    </div> 
                     {/*  <ComicsList /> */}
                     {/* <SingleComics/> */}
                     <img className="bg-decoration" src={bgdecoration} alt="vision" />

@@ -1,82 +1,60 @@
-import { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Spinner from '../spinner/Spinner';
-import MarvelServices from '../../services/MarvelServices';
+import useMarvelServices from '../../services/MarvelServices';
 
 import './charlist.scss'
 
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
     const [selectedChar, setChar] = useState(null);
 
-    const marvelServices = new MarvelServices;
+    const {loading, error, getAllCharacters} = useMarvelServices();
 
     useEffect(() => {
-    
-        window.addEventListener('scroll', showCharListByScroll);
+        onRequest(offset, true);
+
+       /*  window.addEventListener('scroll', showCharListByScroll);
+
         return () => {
             
             window.addEventListener('scroll', showCharListByScroll);
-        }
+        } */
     }, [])
 
-    useEffect(() => {
+/*     useEffect(() => {
         if (newItemLoading && !charEnded) {
             
-            onRequest();
+            onRequest(offset, true);
             
         }
     }, [newItemLoading])
     
     const showCharListByScroll = () => {
-        if ((document.documentElement.clientHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 && !newItemLoading) {
-                setNewItemLoading(true);
-                
+        if (!newItemLoading && !charEnded && (document.documentElement.clientHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 ) {
+                setNewItemLoading(true); 
+                onRequest(offsetRef.current);
         }
-    }
+        if(charEnded) {
+            window.removeEventListener('scroll', showCharListByScroll);
+        }
+    } */
 
-    /* componentDidMount = () => {
-       this.onRequest(); //first render with baseOffset=210
-       window.addEventListener('scroll', showCharListByScroll);
-       console.log('mount')
-    } 
-   componentWillUnmount = () => {
-        window.removeEventListener('scroll', showCharListByScroll);
-        console.log('unmount')
-    } 
-
-   showCharListByScroll = () => {
-        if(window.pageXOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight){
-            if(charEnded){
-                window.removeEventListener('scroll', showCharListByScroll);
-            } else {
-               onRequest(offset)
-            }
-        
-    }  */
-
-    const onRequest = () => {
-        
-        onCharListLoading();
-        marvelServices.getAllCharacters(offset)
+    const onRequest = (offset, initial) => {
+        initial ? setNewItemLoading(false): setNewItemLoading(true)
+        getAllCharacters(offset)
             .then(onCharListLoaded)
-            .catch(onError)
             .finally(
                 () => setNewItemLoading(false));
           
     }
 
-    const onCharListLoading = () => {
-        setNewItemLoading(true)
-    }
 
     const onSelectedCharLocal = (id) => {
         setChar(id)
@@ -89,18 +67,11 @@ const CharList = (props) => {
             ended = true;
         }
 
-        setCharList(charList => [...charList, ...newCharList]);
-        setLoading(loading => false);
+        setCharList(charList => [...charList, ...newCharList]);    
         setNewItemLoading(newItemLoading => false);
         setOffset(offset => offset + 9);
         setCharEnded(charEnded => ended)
     }
-
-    const onError = () => {
-        setLoading(loading => false);
-        setError(true)
-    }
-
 
     // Этот метод создан для оптимизации, 
     // чтобы не помещать такую конструкцию в метод render
@@ -139,14 +110,13 @@ const CharList = (props) => {
     const items = renderItems(charList);
 
     const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error) ? items : null;
+    const spinner = loading && !newItemLoading ? <Spinner /> : null;
 
     return (
         <div className="char__list" >
             {errorMessage}
             {spinner}
-            {content}
+            {items}
             <button className="button button__main button__long"
                 disabled={newItemLoading}
                 onClick={() => onRequest(offset)}

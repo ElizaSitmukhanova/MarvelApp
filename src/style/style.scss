@@ -65,7 +65,11 @@ input::-webkit-inner-spin-button {
             position: fixed;
             right: 100px;
             bottom: 100px;
-            z-index: -1;
+            padding: 0;
+            border: none;
+            color: inherit;
+            background-color: transparent;
+            cursor: pointer;
         }
     }
 }
