@@ -1,80 +1,28 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ComicsPage, MainPage, PageUp, Page404, SingleComicsPage } from "../pages";
 import AppHeader from "../appHeader/AppHeader";
-import ComicsBanner from "../comicsBanner/ComicsBanner";
-import RandomChar from "../randomChar/RandomChar";
-import CharList from '../charList/CharList';
-import ComicsList from "../comicsList/ComicsList";
-import CharInfo from "../charInfo/CharInfo";
-import "../../style/style.scss";
-import bgdecoration from "../../images/bg_decoration.png";
-import { useState, useEffect, useRef } from "react";
-import ErrorBoundarie from "../errorBoundarie/ErrorBoundarie";
-import Up from '../../icons/up.png';
 
+import "../../style/style.scss";
 
 const App = () => {
-   
-    const [selectedChar, setChar] = useState(null)
-    const [scrollPosition, setScrollPosition] = useState(0);
-
-    const onSelectedChar = (id) => {
-        setChar(id)
-    }
-
-    useEffect(() => {
     
-        window.addEventListener('scroll', changeScroll);
-        return () => {
-            
-            window.addEventListener('scroll', changeScroll);
-        }
-    }, [])
+    return (
+        <BrowserRouter>
+        <div id ='up' className="app">
+            <AppHeader />
+            <main>
+                <Routes>
+                    <Route path="/" element={<MainPage />} />
+                    <Route path="/comics" element={<ComicsPage />} />
+                    <Route path="/comics/:comicId" element={<SingleComicsPage />} />
+                    <Route path="*" element={<Page404/>} />
 
-    const changeScroll = () => {
-        setScrollPosition(scrollPosition => window.scrollY)
-    }
-     
-    const pageUp = () => {
-        console.log('вверх');
-        window.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: 'smooth',
-          });
-    }
-
-    let pageUpClass = 'pageup';
-    if (scrollPosition > 1267 ) {
-        pageUpClass += '-block';
-    }
-        return (
-            <div id='up' className="app">
-                <AppHeader/>
-                <ComicsBanner />
-                <main>
-                   {/*  <ErrorBoundarie>
-                        <RandomChar />
-                    </ErrorBoundarie> */}
-                   
-            {/*      <div className="char__content">
-                        <ErrorBoundarie>
-                            <CharList onSelectedChar={onSelectedChar} />
-                        </ErrorBoundarie>
-
-                              <CharInfo charId={selectedChar}  />
-
-
-                    </div>  */}
-                    <ComicsList /> 
-                    {/* <SingleComics/> */}
-                    <img className="bg-decoration" src={bgdecoration} alt="vision" />
-                </main>
-                <button onClick={pageUp} className={pageUpClass} >
-                    <img src={Up} alt="up" />
-                </button>
-            </div>
-        )
-    }
-
-
+                </Routes>
+            </main>
+            <PageUp/>
+        </div>
+        </BrowserRouter>
+    )
+}
 
 export default App;

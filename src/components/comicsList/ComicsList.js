@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import useMarvelServices from '../../services/MarvelServices';
 import Spinner from '../spinner/Spinner';
@@ -43,18 +45,18 @@ const ComicsList = (props) => {
         setComicsEnded(comicsEnded => ended)
     }
     function renderItems(arr) {
-        const items = arr.map((item) => {
+        const items = arr.map((item, i) => {
             return (
                 <li
                     className="comics__item"
-                    key={item.id}>
-                    <a href="#">
+                    key={i}>
+                    <Link to={`/comics/${item.id}`}>
                         <img src={item.thumbnail} alt={item.name} className='comics__item-img' />
                         <div className="comics__item-name">
                             {item.name}
                         </div>
                         <div className="comics__item-price">{item.price}</div>
-                    </a>
+                    </Link>
                 </li>
             )
         })
@@ -69,6 +71,7 @@ const ComicsList = (props) => {
     const items = renderItems(comicsList);
     const errorMessage = error ? <ErrorMessage /> : null;
     const spinner = loading && !newItemLoading ? <Spinner /> : null;
+
     return (
         <div className="comics__list">
             {errorMessage}
@@ -78,7 +81,6 @@ const ComicsList = (props) => {
                 disabled={newItemLoading}
                 onClick={() => onRequest(offset)}
                 style={{ 'display': comicsEnded ? 'none' : 'block' }}>
-
                 <div className="inner">load more</div>
             </button>
         </div>
