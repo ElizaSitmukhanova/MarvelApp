@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useMarvelServices from '../../services/MarvelServices';
+import { motion } from 'framer-motion';
 import Spinner from '../spinner/Spinner';
 import weapon from '../../images/Decoration.png';
 import './randomChar.scss';
@@ -33,8 +34,9 @@ const RandomChar = () => {
     const spinner = loading ? <Spinner /> : null;
     const content = !(loading || error) ? <View char={char} /> : null;
 
+    
     return (
-        <div className="randomchar">
+        <div className='randomchar'>
             {errorMessage}
             {spinner}
             {content}
@@ -63,7 +65,10 @@ const View = ({ char }) => {
         imgStyle = { 'objectFit': 'contain' };
     }
     return (
-        <div className="randomchar__block">
+        <motion.div 
+        animate={{ x: [200, 0] }}
+        transition={{ duration: 1 }}
+        className="randomchar__block">   
             <img src={thumbnail} alt="Random Character" className="randomchar__img" style={imgStyle} />
 
             <div className='randomchar__info'>
@@ -81,7 +86,7 @@ const View = ({ char }) => {
                     </a>
                 </div>
             </div>
-        </div>
+            </motion.div>
     )
 }
 

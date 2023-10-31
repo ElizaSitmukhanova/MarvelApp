@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
+import { motion } from 'framer-motion';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import useMarvelServices from '../../services/MarvelServices';
 import Spinner from '../spinner/Spinner';
@@ -47,7 +47,11 @@ const ComicsList = (props) => {
     function renderItems(arr) {
         const items = arr.map((item, i) => {
             return (
-                <li
+                <motion.li
+                animate={{   scale: [1, 2, 2, 1, 1],
+                    rotate: [0, 0, 270, 270, 0],
+                    borderRadius: ["20%", "20%", "50%", "50%", "20%"], }}
+                    transition={{ duration: 1 }}
                     className="comics__item"
                     key={i}>
                     <Link to={`/comics/${item.id}`}>
@@ -57,7 +61,7 @@ const ComicsList = (props) => {
                         </div>
                         <div className="comics__item-price">{item.price}</div>
                     </Link>
-                </li>
+                </motion.li>
             )
         })
         return (
