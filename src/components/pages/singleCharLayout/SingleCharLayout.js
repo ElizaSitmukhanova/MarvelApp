@@ -1,16 +1,25 @@
 import { Link } from "react-router-dom";
-import '../singleComicLayout/singleComicLayout.scss';
 import { motion } from 'framer-motion';
+import { Helmet } from "react-helmet";
+
+import '../singleComicLayout/singleComicLayout.scss';
 
 const SingleCharLayout = ({ data }) => {
     const { title, thumbnail, description } = data;
+    <Helmet>
+        <meta
+            name="Description"
+            content="Page is about char"
+        />
+        <title>{title}</title>
+    </Helmet>
     return (
-
         <motion.div
-        animate={{   scale: [1, 2, 1, 1, 1],
-            rotate: [ 180, 0,0 , 0, 0],}}
+            animate={{
+                scale: [1, 2, 1, 1, 1],
+                rotate: [180, 0, 0, 0, 0],
+            }}
             transition={{ duration: 4 }}
-           
             className="single-comic">
             <img src={thumbnail} alt={title} className="single-comic__img" />
             <div className="single-comic__info">

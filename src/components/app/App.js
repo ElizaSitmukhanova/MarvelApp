@@ -4,6 +4,7 @@ import AppHeader from "../appHeader/AppHeader";
 import SingleComicLayout from "../pages/singleComicLayout/SingleComicLayout";
 import SingleCharLayout from "../pages/singleCharLayout/SingleCharLayout";
 import SinglePage from "../pages/SinglePage";
+
 import "../../style/style.scss";
 
 const App = () => {
