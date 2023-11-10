@@ -10,19 +10,20 @@ import './search.scss';
 const Search = (props) => {
 
     const [char, setChar] = useState(null);
-    const { loading, error, getCharacterByName, clearError } = useMarvelServices();
+    const { process, setProcess, getCharacterByName, clearError } = useMarvelServices();
 
     const updateChar = (name) => {
         clearError();
         getCharacterByName(name)
             .then(onCharLoaded)
+            .then(() => setProcess('confirmed'))
     }
 
     const onCharLoaded = (char) => {
         setChar(char);
     }
 
-    const errorMessage = error ? <div className="char__search-critical-error"><ErrorMessage /></div> : null;
+    const errorMessage = process === 'error' ? <div className="char__search-critical-error"><ErrorMessage /></div> : null;
     const results = !char ? null : char.length > 0 ? <div className='search__wrapper'>
 
         <div className='search__success'>
@@ -37,11 +38,12 @@ const Search = (props) => {
 
     return (
         <Formik
-            initialValues={{ name: '' }}
+            initialValues={{
+                name: ''
+            }}
             validationSchema={
                 Yup.object({
-                    name: Yup.string()
-                        .required('This field is required'),
+                    name: Yup.string().required('This field is required'),
                 })}
             onSubmit={({ name }) => {
                 updateChar(name);
@@ -59,7 +61,7 @@ const Search = (props) => {
                     />
 
                     <button className="button button__main" type='submit'
-                        disabled={loading}>
+                        disabled={process === 'loading'}>
                         <div className="inner">Find</div>
                     </button>
 

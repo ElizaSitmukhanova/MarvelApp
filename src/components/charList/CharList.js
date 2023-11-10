@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { CSSTransition } from 'react-transition-group';
 import { motion } from 'framer-motion';
@@ -8,6 +8,26 @@ import useMarvelServices from '../../services/MarvelServices';
 
 import './charlist.scss'
 
+
+const setContent = (process, Component, newItemLoading) => {
+    switch (process) {
+        case 'waiting': 
+            return  <Spinner/>;
+            break;
+        case 'loading': 
+            return newItemLoading ? <Component/> : <Spinner/>;
+            break;
+        case 'confirmed':
+            return  <Component/>;
+            break;
+        case 'error':
+            return <ErrorMessage />;
+            break;
+        default:
+            throw new Error('Unexpected process state');
+    }
+}
+
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
@@ -16,41 +36,17 @@ const CharList = (props) => {
     const [charEnded, setCharEnded] = useState(false);
     const [selectedChar, setChar] = useState(null);
 
-    const { loading, error, getAllCharacters } = useMarvelServices();
+    const { process, setProcess, getAllCharacters } = useMarvelServices();
 
     useEffect(() => {
         onRequest(offset, true);
-
-        /*  window.addEventListener('scroll', showCharListByScroll);
- 
-         return () => {
-             
-             window.addEventListener('scroll', showCharListByScroll);
-         } */
     }, [])
-
-    /*     useEffect(() => {
-            if (newItemLoading && !charEnded) {
-                
-                onRequest(offset, true);
-                
-            }
-        }, [newItemLoading])
-        
-        const showCharListByScroll = () => {
-            if (!newItemLoading && !charEnded && (document.documentElement.clientHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 ) {
-                    setNewItemLoading(true); 
-                    onRequest(offsetRef.current);
-            }
-            if(charEnded) {
-                window.removeEventListener('scroll', showCharListByScroll);
-            }
-        } */
 
     const onRequest = (offset, initial) => {
         initial ? setNewItemLoading(false) : setNewItemLoading(true)
         getAllCharacters(offset)
             .then(onCharListLoaded)
+            .then(() => setProcess('confirmed'))
             .finally(
                 () => setNewItemLoading(false));
 
@@ -68,9 +64,9 @@ const CharList = (props) => {
         }
 
         setCharList(charList => [...charList, ...newCharList]);
-        setNewItemLoading(newItemLoading => false);
+        setNewItemLoading(false);
         setOffset(offset => offset + 9);
-        setCharEnded(charEnded => ended)
+        setCharEnded(ended)
     }
     const itemRefs = useRef([]);
 
@@ -82,6 +78,7 @@ const CharList = (props) => {
     // Этот метод создан для оптимизации, 
     // чтобы не помещать такую конструкцию в метод render
     function renderItems(arr) {
+        console.log('render')
         const items = arr.map((item, i) => {
             let imgStyle = { 'objectFit': 'cover' };
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
@@ -90,9 +87,8 @@ const CharList = (props) => {
             return (
                 <CSSTransition
                     key={item.id} timeout={500} classNames="char__item" >
-                    <motion.li
-                        animate={{ y: [200, 0] }}
-                        transition={{ duration: 1 }}
+                    <li
+                        
                         className="char__item"
                         ref={el => itemRefs.current[i] = el}
                         onClick={() => {
@@ -104,7 +100,7 @@ const CharList = (props) => {
                             alt={item.name}
                             style={imgStyle} />
                         <div className="char__name">{item.name}</div>
-                    </motion.li>
+                    </li>
                 </CSSTransition>
             )
         });
@@ -115,16 +111,13 @@ const CharList = (props) => {
         )
     }
 
-    const items = renderItems(charList);
-
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading && !newItemLoading ? <Spinner /> : null;
+    const elements = useMemo(() => {
+        return setContent(process, () =>  renderItems(charList), newItemLoading);
+    }, [process]);
 
     return (
         <div className="char__list" >
-            {errorMessage}
-            {spinner}
-            {items}
+             {elements}
             <button className="button button__main button__long"
                 disabled={newItemLoading}
                 onClick={() => onRequest(offset)}

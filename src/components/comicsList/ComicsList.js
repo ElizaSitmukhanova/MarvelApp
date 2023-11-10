@@ -1,12 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import useMarvelServices from '../../services/MarvelServices';
 import Spinner from '../spinner/Spinner';
 
 import './comicsList.scss';
 import '../../style/buttons.scss';
+
+const setContent = (process, Component, newItemLoading) => {
+    switch (process) {
+        case 'waiting': 
+            return  <Spinner/>;
+            break;
+        case 'loading': 
+            return newItemLoading ? <Component/> : <Spinner/>;
+            break;
+        case 'confirmed':
+            return  <Component/>;
+            break;
+        case 'error':
+            return <ErrorMessage />;
+            break;
+        default:
+            throw new Error('Unexpected process state');
+    }
+}
 
 const ComicsList = (props) => {
 
@@ -15,7 +33,7 @@ const ComicsList = (props) => {
     const [offset, setOffset] = useState(210);
     const [comicsEnded, setComicsEnded] = useState(false);
 
-    const { loading, error, getAllComics } = useMarvelServices();
+    const { process, setProcess, getAllComics } = useMarvelServices();
 
 
     useEffect(() => {
@@ -27,9 +45,9 @@ const ComicsList = (props) => {
         initial ? setNewItemLoading(false) : setNewItemLoading(true)
         getAllComics(offset)
             .then(onComicsListLoaded)
+            .then(() => setProcess('confirmed'))
             .finally(
                 () => setNewItemLoading(false));
-
     }
 
     const onComicsListLoaded = (newComicsList) => { // first loading of 9 cards
@@ -40,18 +58,14 @@ const ComicsList = (props) => {
         }
 
         setComicsList(charList => [...charList, ...newComicsList]);
-        setNewItemLoading(newItemLoading => false);
+        setNewItemLoading(false);
         setOffset(offset => offset + 9);
-        setComicsEnded(comicsEnded => ended)
+        setComicsEnded(ended)
     }
     function renderItems(arr) {
         const items = arr.map((item, i) => {
             return (
-                <motion.li
-                animate={{   scale: [1, 2, 2, 1, 1],
-                    rotate: [0, 0, 270, 270, 0],
-                    borderRadius: ["20%", "20%", "50%", "50%", "20%"], }}
-                    transition={{ duration: 1 }}
+                <li
                     className="comics__item"
                     key={i}>
                     <Link to={`/comics/${item.id}`}>
@@ -61,7 +75,7 @@ const ComicsList = (props) => {
                         </div>
                         <div className="comics__item-price">{item.price}</div>
                     </Link>
-                </motion.li>
+                </li>
             )
         })
         return (
@@ -72,15 +86,10 @@ const ComicsList = (props) => {
         )
     }
 
-    const items = renderItems(comicsList);
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading && !newItemLoading ? <Spinner /> : null;
 
     return (
         <div className="comics__list">
-            {errorMessage}
-            {spinner}
-            {items}
+            {setContent(process, () => renderItems(comicsList), newItemLoading)}
             <button className="button button__main button__long"
                 disabled={newItemLoading}
                 onClick={() => onRequest(offset)}
